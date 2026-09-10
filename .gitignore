@@ -1,0 +1,26 @@
+.venv/
+.direnv/
+.cache/
+# Official downloads, compiled graph arrays, checkpoints and experiment records.
+data/
+runs/
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+*.dll
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+/result
+/result-*
+# Local credentials/settings. The Nix .envrc is intentionally tracked.
+.env
+.env.*
+!.env.example
+.DS_Store

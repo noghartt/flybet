@@ -1,0 +1,13 @@
+:root {
+  --bg: #121a18;
+  --panel: #19221f;
+  --border: #334039;
+  --text: #edf0e8;
+  --muted: #99a69d;
+  --lime: #d2ff65;
+  --paper: #e8eddf;
+  --ink: #17251e;
+  --orange: #ffa568;
+  --pink: #ee8ca8;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}

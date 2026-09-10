@@ -1,0 +1,159 @@
+.experiment-workbench,
+.conditioning-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 22px;
+  margin: 20px 0;
+}
+.experiment-workbench summary {
+  cursor: pointer;
+  font-size: 1.15rem;
+  color: var(--lime);
+}
+.experiment-workbench p,
+.conditioning-panel p {
+  color: var(--muted);
+  max-width: 95ch;
+}
+.template-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 22px 0;
+}
+.template-controls label,
+.protocol-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.template-controls select,
+.protocol-settings input,
+.conditioning-panel select {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 11px;
+  border-radius: 6px;
+  min-width: 0;
+}
+.template-values {
+  max-height: 300px;
+  overflow: auto;
+  font: 12px var(--mono);
+  white-space: pre-wrap;
+}
+.pulse-preview {
+  width: 300px;
+  max-width: 100%;
+  height: 80px;
+}
+.pulse-preview path {
+  fill: none;
+  stroke: var(--lime);
+  stroke-width: 2;
+}
+.chem-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+.chem-metrics span {
+  display: block;
+  color: var(--muted);
+  font: 11px var(--mono);
+  text-transform: uppercase;
+}
+.chem-metrics strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-top: 6px;
+}
+.memory-actions,
+.protocol-settings {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+.memory-actions button,
+.conditioning-panel button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  background: var(--bg);
+  color: var(--text);
+}
+.conditioning-panel button.primary {
+  background: var(--lime);
+  color: var(--ink);
+}
+.protocol-settings input {
+  max-width: 150px;
+}
+.conditioning-panel h2 {
+  font-size: 1.8rem;
+  margin: 10px 0;
+}
+.conditioning-panel table {
+  width: 100%;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+}
+.conditioning-panel th,
+.conditioning-panel td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.protocol-table {
+  overflow-x: auto;
+}
+#learning-conclusion {
+  color: var(--text);
+  font-size: 1.15rem;
+}
+#experiment-error {
+  color: var(--orange);
+}
+.bankroll-detail {
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.bankroll-detail p {
+  margin: 6px 0;
+}
+#bankroll-ledger {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.bankroll-detail small,
+#bankroll-effect {
+  color: #526052;
+}
+@media (max-width: 850px) {
+  .template-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chem-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .template-controls {
+    grid-template-columns: 1fr;
+  }
+  .experiment-workbench,
+  .conditioning-panel {
+    padding: 16px;
+  }
+}

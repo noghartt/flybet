@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#121a18" />
+    <meta
+      name="description"
+      content="Watch a MaleCNS v1.0 connectome simulation play a fake-money slot game. Inspect neural activity and modeled dopamine feedback."
+    />
+    <title>Flybet — Neural behavior lab</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="wordmark" href="/" aria-label="Flybet home"
+        >flybet<span class="brand-dot">✳</span></a
+      >
+      <span class="mast-caption"
+        >NEURAL BEHAVIOR LAB<br /><span class="dim">MALE CNS / V1.0</span></span
+      >
+      <div class="connection">
+        <span id="connection-light" class="light"></span
+        ><span id="connection">Connecting</span>
+      </div>
+      <span class="badge">100% FAKE MONEY</span>
+    </header>
+    <main>
+      <div class="intro-row">
+        <h1>One fly. <em>Three sets of odds.</em></h1>
+        <p>
+          A full MaleCNS v1.0 simulation. Fake-money slots.<br />Live neural
+          activity behind every decision.
+        </p>
+      </div>
+      <section class="scenario-section" aria-labelledby="scenario-title">
+        <div class="section-label">
+          <span id="scenario-title">01 / CHOOSE THE ODDS</span
+          ><span class="dim">Each new run starts with fresh memory</span>
+        </div>
+        <div class="scenarios" role="group" aria-label="Payout scenario">
+          <button
+            class="scenario selected"
+            data-scenario="random"
+            aria-pressed="true"
+          >
+            <span class="scenario-top"
+              ><span>↗↙</span><span class="scenario-number">01</span></span
+            ><strong>Totally random</strong
+            ><span>Independent, uniform reels</span
+            ><span class="scenario-bottom"
+              ><b>100% <small>RTP</small></b
+              ><span>6.25% win chance</span></span
+            >
+          </button>
+          <button class="scenario" data-scenario="fly" aria-pressed="false">
+            <span class="scenario-top"
+              ><span>↗↗</span><span class="scenario-number">02</span></span
+            ><strong>Fly favored</strong
+            ><span>The fly has the mathematical edge</span
+            ><span class="scenario-bottom"
+              ><b>160% <small>RTP</small></b
+              ><span>10% win chance</span></span
+            >
+          </button>
+          <button class="scenario" data-scenario="house" aria-pressed="false">
+            <span class="scenario-top"
+              ><span>↘↘</span><span class="scenario-number">03</span></span
+            ><strong>House favored</strong
+            ><span>The house has the mathematical edge</span
+            ><span class="scenario-bottom"
+              ><b>40% <small>RTP</small></b
+              ><span>2.5% win chance</span></span
+            >
+          </button>
+        </div>
+        <p class="scenario-note">
+          All three modes are random. RTP is the expected return per amount
+          wagered over many plays, not a guaranteed session result.
+        </p>
+      </section>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <section class="experiment-controls" aria-label="Experiment settings">
+        <label
+          >Seed<input
+            id="seed"
+            type="number"
+            min="0"
+            max="4294967295"
+            step="1"
+            value="42"
+        /></label>
+        <label
+          >Starting bankroll (USD)<input
+            id="bankroll"
+            type="number"
+            min="1"
+            max="100000"
+            step="1"
+            value="100"
+        /></label>
+        <label
+          >Base stake (USD)<input
+            id="stake"
+            type="number"
+            min="0.01"
+            max="100000"
+            step="0.01"
+            value="1"
+        /></label>
+        <label
+          >Decisions<input
+            id="decisions"
+            type="number"
+            min="1"
+            max="100000"
+            step="1"
+            value="200"
+        /></label>
+        <label
+          >Controller<select id="policy">
+            <option value="neural">Fly neural output</option>
+            <option value="random-baseline">Random baseline</option>
+          </select></label
+        >
+        <label
+          >Memory<select id="learning">
+            <option value="true">Learning enabled</option>
+            <option value="false">Frozen control</option>
+          </select></label
+        >
+        <button id="run" class="primary">
+          Start experiment <span>↗</span>
+        </button>
+      </section>
+      <details class="experiment-workbench" open>
+        <summary>
+          Experimental controls · memory, chemistry &amp; decisions
+        </summary>
+        <p>
+          Choose model assumptions for the next run. Physiology presets are
+          sensitivity templates, not fits to measured fly recordings.
+          Sensitization and tolerance are bounded addiction hypotheses; they do
+          not establish addiction.
+        </p>
+        <div id="template-controls" class="template-controls"></div>
+        <p id="wealth-preview"></p>
+        <svg
+          class="pulse-preview"
+          viewBox="0 0 300 80"
+          role="img"
+          aria-label="Selected normalized reinforcement pulse over 200 milliseconds"
+        >
+          <path id="pulse-preview-path"></path>
+        </svg>
+        <p id="pulse-caption"></p>
+        <details>
+          <summary>Inspect exact preset parameters</summary>
+          <pre id="template-values" class="template-values"></pre>
+        </details>
+        <p id="active-presets"></p>
+        <div class="chem-metrics">
+          <div>
+            <span>Reward dose history · model units</span
+            ><strong id="chem-exposure">—</strong>
+          </div>
+          <div>
+            <span>Reward sensitivity</span><strong id="chem-gain">—</strong>
+          </div>
+          <div>
+            <span>Current · PAM / PPL</span><strong id="chem-current">—</strong>
+          </div>
+          <div>
+            <span>Withdrawal current · model units</span
+            ><strong id="chem-withdrawal">—</strong>
+          </div>
+        </div>
+        <p id="memory-live">Pause a slot run to change memory.</p>
+        <div class="memory-actions">
+          <button data-memory="freeze" disabled>Freeze memory</button
+          ><button data-memory="enable" disabled>Enable learning</button>
+          <button data-memory="half" disabled>Forget 50%</button
+          ><button data-memory="erase" disabled>Erase memory</button>
+          <button data-memory="reset-chemistry" disabled>
+            Reset chemistry &amp; expectation
+          </button>
+        </div>
+        <p>
+          Forgetting moves learned connection strengths toward baseline.
+          Chemistry reset is separate. Every intervention is recorded and
+          prevents an ordinary matched-run comparison.
+        </p>
+      </details>
+      <div class="lab-grid">
+        <section class="game-panel" aria-labelledby="game-title">
+          <div class="panel-heading">
+            <span id="game-title">02 / THE GAME</span
+            ><span class="small-badge" id="run-scenario">TOTALLY RANDOM</span>
+          </div>
+          <div class="game-title">
+            <span>tigrinho<br /><em>in the lab.</em></span>
+            <div class="payout-stamp">
+              3 MATCH<br /><strong>16×</strong><span>STAKE RETURNED</span>
+            </div>
+          </div>
+          <div
+            class="reel-window"
+            id="reel-window"
+            aria-label="Three reels; center row is the only payline"
+          >
+            <div class="payline-mark left">›</div>
+            <div class="reel" data-reel="0">
+              <span class="ghost symbol symbol-1">◆</span
+              ><strong class="symbol symbol-0">●</strong
+              ><span class="ghost symbol symbol-2">7</span>
+            </div>
+            <div class="reel" data-reel="1">
+              <span class="ghost symbol symbol-2">7</span
+              ><strong class="symbol symbol-1">◆</strong
+              ><span class="ghost symbol symbol-3">★</span>
+            </div>
+            <div class="reel" data-reel="2">
+              <span class="ghost symbol symbol-3">★</span
+              ><strong class="symbol symbol-2">7</strong
+              ><span class="ghost symbol symbol-0">●</span>
+            </div>
+            <div class="payline-mark right">‹</div>
+          </div>
+          <span
+            id="reel-motion"
+            class="reel-motion"
+            role="status"
+            hidden
+          ></span>
+          <div class="outcome-line">
+            <span id="outcome">Waiting for the first neural decision</span
+            ><span id="net-spin">—</span>
+          </div>
+          <div class="money-grid">
+            <div>
+              <span>FAKE BANKROLL</span
+              ><strong id="bankroll-value">$100.00</strong>
+            </div>
+            <div>
+              <span>SESSION CHANGE</span><strong id="session-net">—</strong>
+            </div>
+          </div>
+          <div class="game-stat-row">
+            <span><b id="spins">0</b> spins</span
+            ><span><b id="wins">0</b> wins</span
+            ><span><b id="actual-rtp">—</b> observed RTP</span>
+          </div>
+          <div class="bankroll-detail">
+            <p id="bankroll-ledger">No slot balance yet.</p>
+            <p id="bankroll-decision">No wager decision yet.</p>
+            <p id="bankroll-effect">
+              Profits and losses carry forward on every decision.
+            </p>
+            <small
+              >Simulated dollars. A fresh run resets the balance and brain; step
+              / resume keep the current run.</small
+            >
+          </div>
+          <div class="transport">
+            <button id="step" class="secondary">One neural decision</button
+            ><button id="pause" class="secondary" disabled>Pause</button
+            ><span id="status" class="status" role="status">Ready</span>
+          </div>
+          <div class="decision-line">
+            <span class="dim">NEURAL READOUT</span
+            ><span id="decoder">DNp20 R − L / DNpe017 gate</span>
+          </div>
+        </section>
+        <section class="brain-panel" aria-labelledby="brain-title">
+          <div class="panel-heading">
+            <span id="brain-title">03 / INSIDE THE FLY</span
+            ><span class="record-label"
+              ><span class="light"></span> <span id="neural-clock">0.00</span> s
+              NEURAL TIME</span
+            >
+          </div>
+          <div class="brain-caption">
+            <strong>The fly’s brain in 3D.</strong
+            ><span id="anatomy-coverage"
+              >MaleCNS v1.0 · loading anatomical data</span
+            >
+          </div>
+          <div class="brain-view-switch" aria-label="Brain visualization">
+            <button data-brain-view="anatomy" aria-pressed="true">
+              3D anatomy
+            </button>
+            <button data-brain-view="circuit" aria-pressed="false">
+              Circuit diagram
+            </button>
+          </div>
+          <div id="anatomy-view">
+            <div class="anatomy-controls">
+              <label
+                >View
+                <select id="anatomy-scope">
+                  <option value="cns">Whole CNS</option>
+                  <option value="brain">Brain crop</option>
+                  <option value="vnc">Nerve cord crop</option>
+                </select></label
+              >
+              <label
+                >Color
+                <select id="anatomy-color">
+                  <option value="0">Neural activity</option>
+                  <option value="1">Cell populations</option>
+                  <option value="2">PAM11 / PPL101</option>
+                </select></label
+              >
+            </div>
+            <div class="anatomy-stage">
+              <canvas
+                id="anatomical-brain"
+                tabindex="0"
+                aria-label="Interactive 3D MaleCNS cell-body point cloud. Drag or use arrow keys to rotate, plus and minus to zoom, zero to reset. Click a cell to inspect it."
+              ></canvas>
+              <div class="anatomy-overlay">
+                <span id="anatomy-live">ANATOMY · AWAITING RUN</span
+                ><span id="anatomy-time">—</span>
+              </div>
+              <div class="anatomy-message" id="anatomy-message" role="status">
+                Loading verified cell-body positions…
+              </div>
+              <div class="anatomy-axis">
+                MALE CNS · 8 NM SOURCE VOXELS<br /><span id="anatomy-renderer"
+                  >WEBGL · ALL LOCATED CELLS</span
+                >
+              </div>
+            </div>
+            <div
+              class="anatomy-navigation"
+              aria-label="Anatomical camera controls"
+            >
+              <div>
+                <button data-camera="front">Front</button
+                ><button data-camera="side">Side</button
+                ><button data-camera="dorsal">Dorsal</button>
+              </div>
+              <span>Drag to orbit · scroll to zoom</span>
+              <div>
+                <button data-camera="out" aria-label="Zoom out">−</button
+                ><button data-camera="in" aria-label="Zoom in">+</button>
+              </div>
+            </div>
+            <div class="activity-scale">
+              <span>0 Hz</span><i></i><span>200+ Hz</span
+              ><small>100 ms smoothing · neural time</small>
+            </div>
+            <div class="activity-motion">
+              <label
+                ><input type="checkbox" id="anatomy-motion" checked /> Animate
+                activity</label
+              >
+              <span id="anatomy-motion-note"
+                >Frozen frame · animation resumes with live activity</span
+              >
+            </div>
+            <div id="neuron-inspector" class="neuron-inspector" hidden>
+              <strong id="neuron-name"></strong><b id="neuron-rate"></b
+              ><span id="neuron-family"></span>
+            </div>
+            <div class="population-heading">
+              <span>HIGHLIGHT AN ANNOTATED POPULATION</span
+              ><span>≈ MEAN DISPLAY Hz</span>
+            </div>
+            <div id="anatomy-populations" class="anatomy-populations"></div>
+            <p class="model-note" id="anatomy-note">
+              The point cloud uses measured cell-body locations. Light comes
+              from each neuron's simulated spikes.
+            </p>
+          </div>
+          <div id="circuit-view" hidden>
+            <div class="brain-viz">
+              <canvas
+                id="brain"
+                aria-label="Schematic of selected neural populations with measured firing rates and reconstructed connection strengths"
+              ></canvas>
+              <div id="brain-empty" class="viz-empty">
+                The circuit lights up when a run begins.<br /><span
+                  >166,700 neurons are waiting.</span
+                >
+              </div>
+            </div>
+            <div class="signal-legend">
+              <span><i class="key vision"></i>Sensory / motor</span
+              ><span><i class="key reward"></i>PAM11 reward pathway</span
+              ><span><i class="key aversive"></i>PPL101 aversive pathway</span>
+            </div>
+          </div>
+          <div class="dopamine-readouts">
+            <div>
+              <span><i class="key reward"></i>PAM11 / 15 CELLS</span
+              ><strong id="pam-rate">— <small>Hz</small></strong>
+              <p>Mean firing rate</p>
+            </div>
+            <div>
+              <span><i class="key aversive"></i>PPL101 / 2 CELLS</span
+              ><strong id="ppl-rate">— <small>Hz</small></strong>
+              <p>Mean firing rate</p>
+            </div>
+            <div>
+              <span>ELIGIBLE CONNECTIONS</span
+              ><strong id="plastic-count">0 <small>/ 7,835</small></strong>
+              <p>Changed from baseline</p>
+            </div>
+          </div>
+          <p class="model-note">
+            Signals are simulated spikes and contact-weighted delivery traces,
+            not measured dopamine concentrations. The circuit tab shows a
+            functional schematic.
+          </p>
+          <details class="population-explainer">
+            <summary>Why PAM11 / PPL101? Why only 15 cells?</summary>
+            <p>
+              The simulation integrates all 166,700 retained neurons. Each
+              circuit node summarizes a selected population; it is not an
+              individual cell. The 3D view shows every cell with an annotated
+              soma location.
+            </p>
+            <p>
+              PAM11 and PPL101 are specific annotated cell types: this dataset
+              contains 15 PAM11 cells and 2 PPL101 cells. Those counts describe
+              these types, not all dopamine neurons.
+            </p>
+            <p>
+              This experiment assigns gains to PAM11 stimulation and losses to
+              PPL101 stimulation, alongside candidate plasticity at selected
+              Kenyon-cell → MBON connections. These are modeling choices
+              inherited from the Stonkfly/DOOMFLY framing, not established
+              gambling circuits or a complete dopamine model.
+            </p>
+          </details>
+        </section>
+      </div>
+      <section class="flow-strip" aria-label="Experiment flow">
+        <span data-phase="observe"><b>01</b> See the reels</span><i>→</i
+        ><span data-phase="decide"><b>02</b> Neural decision</span><i>→</i
+        ><span data-phase="spin"><b>03</b> Resolve the bet</span><i>→</i
+        ><span data-phase="feedback"><b>04</b> Dopamine feedback</span><i>↺</i>
+      </section>
+      <section class="conditioning-panel" aria-labelledby="conditioning-title">
+        <span class="section-label">CONTROLLED LEARNING TEST</span>
+        <h2 id="conditioning-title">Did memory change the choice?</h2>
+        <p>
+          Condition two visual patterns with reward and aversive pulses, then
+          probe both without feedback. Each seed runs trained, frozen,
+          erased-memory, and unpaired-feedback arms on the full connectome.
+          Training is passive: no wagers or forced spins. Pattern meaning is
+          counterbalanced across seeds.
+        </p>
+        <div class="protocol-settings">
+          <label
+            >Seeds<input
+              id="protocol-seeds"
+              type="number"
+              value="5"
+              min="1"
+              max="30"
+              step="1"
+          /></label>
+          <label
+            >Training trials / arm<input
+              id="protocol-trials"
+              type="number"
+              value="20"
+              min="2"
+              max="200"
+              step="2"
+          /></label>
+          <label
+            >Passive memory decay (s)<input
+              id="protocol-retention"
+              type="number"
+              value="0"
+              min="0"
+              max="3600"
+              step="1"
+          /></label>
+          <button id="protocol-start" class="primary">Run learning test</button
+          ><button id="protocol-stop" disabled>Stop test</button>
+        </div>
+        <p>
+          The decay interval applies the declared memory-decay equation, not an
+          integrated period of brain activity. Probes freeze weights and reset
+          electrical transients and chemistry so residual stimulation cannot
+          masquerade as retained memory. All arms use the selected presets; the
+          test controls learning independently of the slot memory selector.
+        </p>
+        <p id="protocol-progress">Four matched arms per seed.</p>
+        <label
+          >Analyze conditioning report<select id="protocol-source">
+            <option value="live">Current conditioning test</option>
+          </select></label
+        >
+        <button id="protocol-refresh">Refresh reports</button>
+        <a id="protocol-download" hidden>Download full report ↗</a>
+        <p id="learning-conclusion">No completed learning test yet.</p>
+        <p>
+          Primary measure: change in SPIN response to the rewarded pattern minus
+          the punished pattern, compared with each control. Wager-tier contrast
+          describes the decoder's proposed choice, with no money involved.
+          Intervals resample whole paired seeds; these exploratory comparisons
+          do not prove biological learning or risk preference.
+        </p>
+        <div class="protocol-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Measure</th>
+                <th>Control difference</th>
+                <th>Paired seeds</th>
+                <th>Mean</th>
+                <th>95% bootstrap interval</th>
+              </tr>
+            </thead>
+            <tbody id="protocol-comparisons"></tbody>
+          </table>
+        </div>
+        <p id="experiment-error" role="status"></p>
+      </section>
+      <section class="insights-panel" aria-labelledby="insights-title">
+        <div class="panel-heading">
+          <span>04 / BEHAVIOR &amp; EXPOSURE</span
+          ><span id="insight-coverage">0 completed decisions · whole run</span>
+        </div>
+        <div class="insight-title-row">
+          <div>
+            <h2 id="insights-title">What changes after a win?</h2>
+            <p id="insight-scope">Choose a live or saved run.</p>
+          </div>
+          <a id="insight-export" hidden>Export measurements ↗</a>
+        </div>
+        <div class="insight-selectors">
+          <label
+            >Analyze<select id="insight-source">
+              <option value="live">Current live run</option>
+            </select></label
+          >
+          <button id="insight-refresh" class="secondary">
+            Refresh saved runs
+          </button>
+        </div>
+        <p id="insight-catalog-note" class="insight-note"></p>
+        <p id="insight-source-note" class="insight-note" hidden>
+          This panel analyzes the selected saved record. The game and 3D brain
+          above continue to show the current live run.
+        </p>
+        <p id="insight-error" class="insight-error" role="status" hidden></p>
+        <p id="insight-warning" class="insight-note"></p>
+        <div class="insight-cards">
+          <div>
+            <span>PLAYS INSTEAD OF WAITING</span
+            ><strong id="insight-play-rate">—</strong
+            ><small id="insight-play-count">No decisions yet</small>
+          </div>
+          <div>
+            <span>RECENT PLAY RATE</span><strong id="insight-recent">—</strong
+            ><small id="insight-recent-count"
+              >Last 0 decisions · up to 20</small
+            >
+          </div>
+          <div>
+            <span>TOTAL WAGERED</span><strong id="insight-wagered">—</strong
+            ><small id="insight-net">Net result —</small>
+          </div>
+          <div>
+            <span>MEAN BANKROLL SHARE / SPIN</span
+            ><strong id="insight-risk">—</strong
+            ><small id="insight-risk-max">Largest share —</small>
+          </div>
+        </div>
+        <p id="insight-stake-note" class="insight-stake-note">
+          Stake size stays fixed within each run. The fly can play or wait.
+        </p>
+        <div class="insight-outcomes">
+          <article class="insight-outcome win">
+            <h3>After a win</h3>
+            <span>Plays on the very next decision</span
+            ><strong id="after-win-rate">—</strong>
+            <svg
+              viewBox="0 0 100 5"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <rect width="100" height="5" class="outcome-track" />
+              <rect id="after-win-bar" width="0" height="5" />
+            </svg>
+            <p id="after-win-count">No following decisions yet</p>
+            <p id="after-win-risk">Mean bankroll share on next decision: —</p>
+            <div class="insight-spending">
+              <span>Mean wagered over the next 5 decisions</span
+              ><b id="after-win-spend">—</b>
+            </div>
+            <p id="after-win-windows">Needs five later decisions</p>
+          </article>
+          <article class="insight-outcome loss">
+            <h3>After a loss</h3>
+            <span>Plays on the very next decision</span
+            ><strong id="after-loss-rate">—</strong>
+            <svg
+              viewBox="0 0 100 5"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <rect width="100" height="5" class="outcome-track" />
+              <rect id="after-loss-bar" width="0" height="5" />
+            </svg>
+            <p id="after-loss-count">No following decisions yet</p>
+            <p id="after-loss-risk">Mean bankroll share on next decision: —</p>
+            <div class="insight-spending">
+              <span>Mean wagered over the next 5 decisions</span
+              ><b id="after-loss-spend">—</b>
+            </div>
+            <p id="after-loss-windows">Needs five later decisions</p>
+          </article>
+        </div>
+        <div class="insight-observation">
+          <p id="insight-verdict">
+            Complete a decision to start measuring behavior.
+          </p>
+          <p id="insight-spend-difference">
+            Spending comparison needs complete follow-up windows.
+          </p>
+        </div>
+        <p class="insight-note">
+          The triggering bet is excluded. WAIT counts as zero spending.
+          Incomplete follow-ups are excluded, including at the end of a run;
+          windows can overlap. Small or unequal samples can be misleading. These
+          patterns do not establish a change in risk preference.
+        </p>
+        <div class="insight-chart-heading">
+          <h3>Behavior through the session</h3>
+          <label
+            >Plot<select id="insight-chart-kind">
+              <option value="play">Play frequency</option>
+              <option value="bankroll">Bankroll</option>
+              <option value="exposure">Bankroll share wagered</option>
+              <option value="memory">Connection strength</option>
+              <option value="stake">Mean played stake</option>
+              <option value="wealth">Bankroll influence on wagers</option>
+              <option value="chemistry">Reward dose history</option>
+              <option value="sensitivity">Reward sensitivity</option>
+              <option value="withdrawal">Withdrawal current</option>
+            </select></label
+          >
+        </div>
+        <div class="insight-chart-key">
+          <span><i></i>Selected run</span
+          ><span id="insight-reference-key" hidden><i></i>Reference run</span>
+        </div>
+        <svg
+          id="insight-chart"
+          viewBox="0 0 1000 225"
+          role="img"
+          aria-label="Whole-session measurements by decision block"
+        ></svg>
+        <p id="insight-chart-note" class="insight-note">
+          The chart will use completed decisions.
+        </p>
+        <details class="insight-values">
+          <summary>View selected run's chart values</summary>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Decisions</th>
+                  <th>SPIN / decisions</th>
+                  <th>Selected measurement</th>
+                </tr>
+              </thead>
+              <tbody id="insight-chart-values"></tbody>
+            </table>
+          </div>
+        </details>
+        <div class="insight-mechanisms">
+          <div>
+            <h3>What happened inside the model?</h3>
+            <p class="insight-note">
+              Mean firing rate during observation → feedback. This checks the
+              programmed feedback response; it does not measure pleasure or
+              prove learning.
+            </p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Outcome</th>
+                    <th>Count</th>
+                    <th>PAM11</th>
+                    <th>PPL101</th>
+                  </tr>
+                </thead>
+                <tbody id="insight-responses"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 id="insight-memory">—</h3>
+            <p id="insight-efficacy" class="insight-note">—</p>
+            <p class="insight-note">
+              These are eligible connections whose strength differs from the
+              starting value. Changes alone do not establish learned behavior.
+            </p>
+            <h3>Why did the decoder choose WAIT?</h3>
+            <p id="insight-wait-reasons" class="insight-note">
+              No completed WAIT decisions yet.
+            </p>
+          </div>
+        </div>
+        <details class="insight-compare">
+          <summary>Compare with another run</summary>
+          <label
+            >Reference<select id="insight-reference">
+              <option value="">No reference run</option>
+            </select></label
+          >
+          <label
+            ><input type="checkbox" id="insight-compare-presets" />Allow
+            different presets · exploratory comparison</label
+          >
+          <p id="insight-comparison-note" class="insight-note">
+            Compare learning-enabled, frozen-memory, and random-baseline runs
+            with matching settings.
+          </p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Measurement</th>
+                  <th>Selected run</th>
+                  <th>Reference run</th>
+                </tr>
+              </thead>
+              <tbody id="insight-comparison" hidden></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+      <div class="lower-grid">
+        <section class="trace-panel">
+          <div class="panel-heading">
+            <span>05 / DOPAMINE ACTIVITY</span
+            ><span id="stimulus" class="small-badge">NO EXTERNAL PULSE</span>
+          </div>
+          <div class="chart-label">
+            <span>Population mean · Hz</span
+            ><span>Last 2.4 neural seconds</span>
+          </div>
+          <canvas
+            id="trace"
+            aria-label="Measured mean PAM11 and PPL101 firing rates over neural time"
+          ></canvas>
+          <div class="delivery-row">
+            <span>PAM11 → MBON07 delivery <b id="pam-delivery">—</b></span
+            ><span>PPL101 → MBON11 delivery <b id="ppl-delivery">—</b></span>
+          </div>
+          <p class="model-note">
+            Delivery is a decaying, contact-weighted model trace in arbitrary
+            units. Both pathways can fire without an external pulse.
+          </p>
+        </section>
+        <section class="retina-panel">
+          <div class="panel-heading">
+            <span>06 / THE FLY'S INPUT</span
+            ><span class="dim">320 × 180 RGB</span>
+          </div>
+          <img
+            id="retina"
+            src="/api/retina.png"
+            width="320"
+            height="180"
+            alt="Exact rendered observation supplied to the simulated photoreceptors"
+          />
+          <p>
+            3,335 brightness inputs + 811 color inputs. Pixels and declared
+            reinforcement drive neural activity. Bankroll weighting is a
+            separate wager-decoder input; it does not represent neural firing.
+          </p>
+          <div class="efficacy">
+            <span>Mean memory efficacy</span
+            ><strong id="efficacy">1.000000×</strong>
+          </div>
+        </section>
+      </div>
+      <section class="history-panel">
+        <div class="panel-heading">
+          <span>07 / OBSERVATION LOG</span
+          ><a id="export" href="/api/export" hidden>Export full JSONL ↗</a>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Decision</th>
+                <th>Action</th>
+                <th>Symbols</th>
+                <th>Stake</th>
+                <th>Net outcome</th>
+                <th>Feedback</th>
+                <th>PAM / PPL spikes</th>
+                <th>Bankroll</th>
+              </tr>
+            </thead>
+            <tbody id="history">
+              <tr>
+                <td colspan="7" class="empty-row">
+                  Your experiment starts here. Outcomes and neural measurements
+                  will appear after each decision.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <details class="methods">
+        <summary>What this experiment measures <span>+</span></summary>
+        <div>
+          <p>
+            The official MaleCNS v1.0 wiring drives a simplified spiking model.
+            A configured neural decoder proposes SPIN or WAIT and, in adaptive
+            mode, a stake tier. No language model chooses actions. Three
+            matching center symbols return 16 times the stake; other
+            combinations return zero.
+          </p>
+          <p>
+            Reward and pulse templates encode outcomes as currents into PAM11 or
+            PPL101 cells. Chemistry templates can change sensitivity and add
+            withdrawal drive. Actual spikes drive a candidate memory rule on
+            existing KC → MBON07 / MBON11 connections. Weight changes alone do
+            not establish learning, and this model does not measure pleasure,
+            pain, or addiction.
+          </p>
+          <p>
+            Each decision advances 300 ms of neural time, followed by 200 ms of
+            feedback or neutral observation. Runs finish at their decision limit
+            or when the fake bankroll cannot cover a stake. WAIT is a valid
+            neural choice. The random baseline is explicitly separate from
+            neural control.
+          </p>
+          <p>
+            All scenarios use fixed, independent outcome probabilities. Changing
+            scenarios starts a new run. The seed reproduces game randomness;
+            exact neural reproducibility also depends on the recorded source,
+            compiler, and model. Compare multiple runs and frozen-memory
+            controls before interpreting behavior.
+          </p>
+          <a
+            href="https://male-cns.janelia.org/"
+            target="_blank"
+            rel="noreferrer"
+            >MaleCNS dataset ↗</a
+          >
+        </div>
+      </details>
+      <footer>
+        <span>FLYBET / AN EXPERIMENT, NOT A PREDICTION.</span
+        ><span id="dataset-status">MaleCNS v1.0 · checking dataset</span>
+      </footer>
+    </main>
+  </body>
+</html>
